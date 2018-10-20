@@ -9,10 +9,6 @@ public class PlayerController : MonoBehaviour
 
 	private void Update()
 	{
-		if (Input.GetKeyDown(KeyCode.W))
-		{
-			MovePlayer();
-		}
 #if UNITY_EDITOR
 		if (Input.GetKeyDown(KeyCode.W))
 		{
@@ -31,7 +27,11 @@ public class PlayerController : MonoBehaviour
 
 		if (!gameObject.GetComponent<Renderer>().IsVisibleFrom(Camera.main))
 		{
-			DiePlayer();
+			GameController.score = 0;
+			Camera.main.GetComponent<CameraController>().onMove = false;
+			UI.Instance.restartGame.SetActive(true);
+			UI.Instance.exitGame.SetActive(true);
+			Destroy(this.gameObject);
 		}
 	}
 
@@ -42,31 +42,17 @@ public class PlayerController : MonoBehaviour
 		UI.Instance.textScore.text = "Score:\n" + GameController.score;
 	}
 
-	private void OnCollisionEnter(Collision collision)
-	{
-		if (collision.gameObject.CompareTag("Enemy"))
-		{
-			Instantiate(particle, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.Euler(-90, 0, 0));
-			Instantiate(particleCube, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.Euler(-90, 0, 0));
-			DiePlayer();
-		}
-	}
 	private void OnTriggerEnter(Collider other)
 	{
 		if (other.gameObject.CompareTag("Enemy"))
 		{
+			GameController.score = 0;
+			Camera.main.GetComponent<CameraController>().onMove = false;
+			UI.Instance.restartGame.SetActive(true);
+			UI.Instance.exitGame.SetActive(true);
 			Instantiate(particle, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.Euler(-90, 0, 0));
 			Instantiate(particleCube, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.Euler(-90, 0, 0));
-			DiePlayer();
+			Destroy(this.gameObject);
 		}
-	}
-
-	private void DiePlayer()
-	{
-		GameController.score = 0;
-		Camera.main.GetComponent<CameraController>().onMove = false;
-		UI.Instance.restartGame.SetActive(true);
-		UI.Instance.exitGame.SetActive(true);
-		Destroy(this.gameObject);
 	}
 }

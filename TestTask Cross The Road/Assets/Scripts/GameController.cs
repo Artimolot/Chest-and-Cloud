@@ -16,11 +16,12 @@ public class GameController : MonoBehaviour
 	public GameObject enemyColonPrefab;
 	public GameObject Player;
 	private Queue<EnemyController> enemyPool = new Queue<EnemyController>();
-	private float countEnemyInGame = 10;
+	private float countEnemyInGame = 15;
 	private float directionEnemy = 1;
 	private float distanceBetweEnemy = 2;
 	private const float xPosMinEnemy = 11;
 	private const float xPosMaxEnemy = 20;
+	public bool newSpawn = true;
 	#endregion
 
 	private void Awake()
@@ -44,7 +45,7 @@ public class GameController : MonoBehaviour
 		#endregion
 
 		#region Enemy
-		if(countEnemyInGame == 0)
+		if(countEnemyInGame == 0 && newSpawn == true)
 		{
 			if (!enemyPool.Peek().GetComponent<Renderer>().IsVisibleFrom(Camera.main) && Camera.main.transform.position.z > enemyPool.Peek().transform.position.z + 5f)
 			{
@@ -126,14 +127,16 @@ public class GameController : MonoBehaviour
 
 	IEnumerator NewPositionEnemy(EnemyController obj)
 	{
-		float time = 2.0f;
+		float time = 1.0f;
+		newSpawn = false;
 		while (time > 0f)
 		{
 			time -= Time.deltaTime;
 			yield return null;
 		}
 		obj.transform.position = new Vector3(Random.Range(12, 20), obj.transform.position.y, Player.transform.position.z + distanceBetweEnemy);
-		obj.GetComponent<EnemyController>().speed -= 5f;
+		obj.GetComponent<EnemyController>().speed -= 3f;
+		newSpawn = true;
 		enemyPool.Enqueue(obj);
 		distanceBetweEnemy += 2;
 		yield return null;
@@ -141,7 +144,7 @@ public class GameController : MonoBehaviour
 
 	IEnumerator SpawnEnemy()
 	{
-		float time = 2.0f;
+		float time = 1.5f;
 		while(time > 0f)
 		{
 			time -= Time.deltaTime;

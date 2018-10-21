@@ -4,6 +4,6 @@ using UnityEngine;
 
 public class EnemyController : MonoBehaviour
 {
-	public float speed = -5f;
+	public float speed;
 	public bool onRight;
 }

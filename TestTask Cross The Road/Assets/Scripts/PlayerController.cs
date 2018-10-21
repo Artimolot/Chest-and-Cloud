@@ -27,12 +27,17 @@ public class PlayerController : MonoBehaviour
 
 		if (!gameObject.GetComponent<Renderer>().IsVisibleFrom(Camera.main))
 		{
-			GameController.score = 0;
-			Camera.main.GetComponent<CameraController>().onMove = false;
-			UI.Instance.restartGame.SetActive(true);
-			UI.Instance.exitGame.SetActive(true);
-			Destroy(this.gameObject);
+			DestroyPlayer();
 		}
+	}
+
+	private void DestroyPlayer()
+	{
+		GameController.score = 0;
+		Camera.main.GetComponent<CameraController>().onMove = false;
+		UI.Instance.restartGame.SetActive(true);
+		UI.Instance.exitGame.SetActive(true);
+		Destroy(this.gameObject);
 	}
 
 	private void MovePlayer()

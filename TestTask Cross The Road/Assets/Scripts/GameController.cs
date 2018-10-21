@@ -7,16 +7,20 @@ public class GameController : MonoBehaviour
 	public static int score;
 
 	#region Road
-	public Queue<GameObject> road = new Queue<GameObject>();
+	private Queue<GameObject> road = new Queue<GameObject>();
 	private const float distanceRoad = 60f;
 	#endregion
 
 	#region Enemy
-	public GameObject prefab;
-	public Queue<EnemyController> enemys = new Queue<EnemyController>();
-	private int countEnemys = 20;
-	private float line = 2;
-	private float distance = 2;
+	public GameObject enemyPrefab;
+	public GameObject enemyColonPrefab;
+	public GameObject Player;
+	private Queue<EnemyController> enemyPool = new Queue<EnemyController>();
+	private float countEnemyInGame = 10;
+	private float directionEnemy = 1;
+	private float distanceBetweEnemy = 2;
+	private const float xPosMinEnemy = 11;
+	private const float xPosMaxEnemy = 20;
 	#endregion
 
 	private void Awake()
@@ -27,93 +31,122 @@ public class GameController : MonoBehaviour
 
 	private void Start()
 	{
-		for (int i = 0; i < countEnemys; i++)
-		{
-			GameObject obj;
-			if (line % 2 == 0)
-			{
-				obj = Instantiate(prefab, new Vector3(Random.Range(12, 20), transform.position.y, transform.position.z + distance), Quaternion.identity);
-				obj.GetComponent<EnemyController>().onRight = true;
-				line++;
-			}
-			else
-			{
-				obj = Instantiate(prefab, new Vector3(Random.Range(-12, -20), transform.position.y, transform.position.z + distance), Quaternion.identity);
-				obj.GetComponent<EnemyController>().onRight = false;
-				line++;
-			}
-			distance += 2;
-			enemys.Enqueue(obj.GetComponent<EnemyController>());
-		}
+		StartCoroutine(SpawnEnemy());
 	}
 
 	private void Update()
 	{
+		#region Road
 		if (!road.Peek().GetComponent<Renderer>().IsVisibleFrom(Camera.main))
 		{
 			ResetRoad(road.Dequeue());
 		}
+		#endregion
 
 		#region Enemy
-		if (!enemys.Peek().GetComponent<Renderer>().IsVisibleFrom(Camera.main) && Camera.main.transform.position.z > enemys.Peek().transform.position.z + 5f)
+		if(countEnemyInGame == 0)
 		{
-			ResetObject(enemys.Dequeue());
+			if (!enemyPool.Peek().GetComponent<Renderer>().IsVisibleFrom(Camera.main) && Camera.main.transform.position.z > enemyPool.Peek().transform.position.z + 5f)
+			{
+				StartCoroutine(NewPositionEnemy(enemyPool.Dequeue()));
+			}
 		}
-		foreach (EnemyController enemy in enemys)
+		foreach (EnemyController enemy in enemyPool)
 		{
 			if (enemy.GetComponent<EnemyController>().onRight == true)
-			{
-				enemy.transform.position = new Vector3(enemy.transform.position.x + enemy.GetComponent<EnemyController>().speed * Time.deltaTime, enemy.transform.position.y, enemy.transform.position.z);
-				if (enemy.transform.position.x < -12)
-				{
-					ResetLineObject(enemy);
-				}
-			}
-			else
 			{
 				enemy.transform.position = new Vector3(enemy.transform.position.x - enemy.GetComponent<EnemyController>().speed * Time.deltaTime, enemy.transform.position.y, enemy.transform.position.z);
 				if (enemy.transform.position.x > 12)
 				{
-					ResetLineObject(enemy);
+					ResetLineEnemy(enemy);
+				}
+			}
+			else
+			{
+				enemy.transform.position = new Vector3(enemy.transform.position.x + enemy.GetComponent<EnemyController>().speed * Time.deltaTime, enemy.transform.position.y, enemy.transform.position.z);
+				if (enemy.transform.position.x < -12)
+				{
+					ResetLineEnemy(enemy);
 				}
 			}
 		}
 		#endregion
 	}
 
-	#region Enemy
-	private void ResetObject(EnemyController obj)
-	{
-		if (obj.GetComponent<EnemyController>().onRight == true)
-		{
-			obj.transform.position = new Vector3(Random.Range(12, 20), obj.transform.position.y, obj.transform.position.z + distance);
-		}
-		else
-		{
-			obj.transform.position = new Vector3(Random.Range(-12, -20), obj.transform.position.y, obj.transform.position.z + distance);
-		}
-		obj.GetComponent<EnemyController>().speed -= 5f;
-		enemys.Enqueue(obj);
-		line++;
-		distance += 2;
-	}
-
-	private void ResetLineObject(EnemyController obj)
-	{
-		if (obj.GetComponent<EnemyController>().onRight == true)
-		{
-			obj.transform.position = new Vector3(Random.Range(12, 20), obj.transform.position.y, obj.transform.position.z);
-		}
-		else
-		{
-			obj.transform.position = new Vector3(Random.Range(-12, -20), obj.transform.position.y, obj.transform.position.z);
-		}
-	}
-	#endregion
-
 	private void ResetRoad(GameObject obj)
 	{
 		obj.transform.position = new Vector3(obj.transform.position.x, obj.transform.position.y, obj.transform.position.z + distanceRoad);
 		road.Enqueue(obj);
+	}
+
+	private void StartSpawnEnemy()
+	{
+		if (countEnemyInGame > 0)
+		{
+			GameObject obj;
+			if (directionEnemy % 2 == 0)
+			{
+				obj = Instantiate(enemyPrefab, new Vector3(Random.Range(-xPosMinEnemy, -xPosMaxEnemy), transform.position.y, Player.transform.position.z + distanceBetweEnemy), Quaternion.identity);
+				obj.GetComponent<EnemyController>().onRight = true;
+			}
+			else if(countEnemyInGame == 8)
+			{
+				obj = Instantiate(enemyColonPrefab, new Vector3(Random.Range(-xPosMinEnemy, -xPosMaxEnemy), transform.position.y, Player.transform.position.z + distanceBetweEnemy), Quaternion.identity);
+				obj.GetComponent<EnemyController>().onRight = true;
+			}
+			else if(countEnemyInGame == 4)
+			{
+				obj = Instantiate(enemyColonPrefab, new Vector3(Random.Range(xPosMinEnemy, xPosMaxEnemy), transform.position.y, Player.transform.position.z + distanceBetweEnemy), Quaternion.identity);
+				obj.GetComponent<EnemyController>().onRight = false;
+			}
+			else
+			{
+				obj = Instantiate(enemyPrefab, new Vector3(Random.Range(xPosMinEnemy, xPosMaxEnemy), transform.position.y, Player.transform.position.z + distanceBetweEnemy), Quaternion.identity);
+				obj.GetComponent<EnemyController>().onRight = false;
+			}
+			enemyPool.Enqueue(obj.GetComponent<EnemyController>());
+			distanceBetweEnemy += 2;
+			directionEnemy++;
+			countEnemyInGame--;
+			StartCoroutine(SpawnEnemy());
+		}
+	}
+
+	private void ResetLineEnemy(EnemyController obj)
+	{
+		if (obj.GetComponent<EnemyController>().onRight)
+		{
+			obj.transform.position = new Vector3(Random.Range(-xPosMinEnemy, -xPosMaxEnemy), obj.transform.position.y, obj.transform.position.z);
+		}
+		else
+		{
+			obj.transform.position = new Vector3(Random.Range(xPosMinEnemy, xPosMaxEnemy), obj.transform.position.y, obj.transform.position.z);
+		}
+	}
+
+	IEnumerator NewPositionEnemy(EnemyController obj)
+	{
+		float time = 2.0f;
+		while (time > 0f)
+		{
+			time -= Time.deltaTime;
+			yield return null;
+		}
+		obj.transform.position = new Vector3(Random.Range(12, 20), obj.transform.position.y, Player.transform.position.z + distanceBetweEnemy);
+		obj.GetComponent<EnemyController>().speed -= 5f;
+		enemyPool.Enqueue(obj);
+		distanceBetweEnemy += 2;
+		yield return null;
+	}
+
+	IEnumerator SpawnEnemy()
+	{
+		float time = 2.0f;
+		while(time > 0f)
+		{
+			time -= Time.deltaTime;
+			yield return null;
+		}
+		StartSpawnEnemy();
 	}
 }

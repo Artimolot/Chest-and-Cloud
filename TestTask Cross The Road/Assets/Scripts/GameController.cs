@@ -16,12 +16,11 @@ public class GameController : MonoBehaviour
 	public GameObject enemyColonPrefab;
 	public GameObject Player;
 	private Queue<EnemyController> enemyPool = new Queue<EnemyController>();
-	private float countEnemyInGame = 15;
+	private float countEnemyInGame = 25;
 	private float directionEnemy = 1;
 	private float distanceBetweEnemy = 2;
-	private const float xPosMinEnemy = 11;
-	private const float xPosMaxEnemy = 20;
-	public bool newSpawn = true;
+	private const float xPosMinEnemy = 15;
+	private const float xPosMaxEnemy = 25;
 	#endregion
 
 	private void Awake()
@@ -32,7 +31,7 @@ public class GameController : MonoBehaviour
 
 	private void Start()
 	{
-		StartCoroutine(SpawnEnemy());
+		SpawnEnemy();
 	}
 
 	private void Update()
@@ -45,29 +44,41 @@ public class GameController : MonoBehaviour
 		#endregion
 
 		#region Enemy
-		if(countEnemyInGame == 0 && newSpawn == true)
+		if (!enemyPool.Peek().GetComponent<Renderer>().IsVisibleFrom(Camera.main) && Camera.main.transform.position.z > enemyPool.Peek().transform.position.z + 5f)
 		{
-			if (!enemyPool.Peek().GetComponent<Renderer>().IsVisibleFrom(Camera.main) && Camera.main.transform.position.z > enemyPool.Peek().transform.position.z + 5f)
-			{
-				StartCoroutine(NewPositionEnemy(enemyPool.Dequeue()));
-			}
+			NewPositionEnemy(enemyPool.Dequeue());
 		}
 		foreach (EnemyController enemy in enemyPool)
 		{
-			if (enemy.GetComponent<EnemyController>().onRight == true)
+
+			if (enemy.onRight == true)
 			{
-				enemy.transform.position = new Vector3(enemy.transform.position.x - enemy.GetComponent<EnemyController>().speed * Time.deltaTime, enemy.transform.position.y, enemy.transform.position.z);
-				if (enemy.transform.position.x > 12)
+				if (enemy.moveTime <= 0f)
 				{
-					ResetLineEnemy(enemy);
+					enemy.transform.position = new Vector3(enemy.transform.position.x - enemy.speed * Time.deltaTime, enemy.transform.position.y, enemy.transform.position.z);
+					if (enemy.transform.position.x > 15)
+					{
+						ResetLineEnemy(enemy);
+					}
+				}
+				else
+				{
+					enemy.moveTime -= Time.deltaTime;
 				}
 			}
 			else
 			{
-				enemy.transform.position = new Vector3(enemy.transform.position.x + enemy.GetComponent<EnemyController>().speed * Time.deltaTime, enemy.transform.position.y, enemy.transform.position.z);
-				if (enemy.transform.position.x < -12)
+				if (enemy.moveTime <= 0f)
 				{
-					ResetLineEnemy(enemy);
+					enemy.transform.position = new Vector3(enemy.transform.position.x + enemy.speed * Time.deltaTime, enemy.transform.position.y, enemy.transform.position.z);
+					if (enemy.transform.position.x < -15)
+					{
+						ResetLineEnemy(enemy);
+					}
+				}
+				else
+				{
+					enemy.moveTime -= Time.deltaTime;
 				}
 			}
 		}
@@ -80,36 +91,35 @@ public class GameController : MonoBehaviour
 		road.Enqueue(obj);
 	}
 
-	private void StartSpawnEnemy()
+	private void SpawnEnemy()
 	{
-		if (countEnemyInGame > 0)
+		for (int i = 0; i < countEnemyInGame; i++)
 		{
 			GameObject obj;
 			if (directionEnemy % 2 == 0)
 			{
-				obj = Instantiate(enemyPrefab, new Vector3(Random.Range(-xPosMinEnemy, -xPosMaxEnemy), transform.position.y, Player.transform.position.z + distanceBetweEnemy), Quaternion.identity);
+				obj = Instantiate(enemyPrefab, new Vector3(Random.Range(-xPosMinEnemy, -xPosMaxEnemy), transform.position.y, transform.position.z + distanceBetweEnemy), Quaternion.identity);
 				obj.GetComponent<EnemyController>().onRight = true;
 			}
-			else if(countEnemyInGame == 8)
+			else if (i % 5 == 0)
 			{
-				obj = Instantiate(enemyColonPrefab, new Vector3(Random.Range(-xPosMinEnemy, -xPosMaxEnemy), transform.position.y, Player.transform.position.z + distanceBetweEnemy), Quaternion.identity);
+				obj = Instantiate(enemyColonPrefab, new Vector3(Random.Range(-xPosMinEnemy, -xPosMaxEnemy), transform.position.y, transform.position.z + distanceBetweEnemy), Quaternion.identity);
 				obj.GetComponent<EnemyController>().onRight = true;
 			}
-			else if(countEnemyInGame == 4)
+			else if (i % 9 == 0)
 			{
-				obj = Instantiate(enemyColonPrefab, new Vector3(Random.Range(xPosMinEnemy, xPosMaxEnemy), transform.position.y, Player.transform.position.z + distanceBetweEnemy), Quaternion.identity);
+				obj = Instantiate(enemyColonPrefab, new Vector3(Random.Range(xPosMinEnemy, xPosMaxEnemy), transform.position.y, transform.position.z + distanceBetweEnemy), Quaternion.identity);
 				obj.GetComponent<EnemyController>().onRight = false;
 			}
 			else
 			{
-				obj = Instantiate(enemyPrefab, new Vector3(Random.Range(xPosMinEnemy, xPosMaxEnemy), transform.position.y, Player.transform.position.z + distanceBetweEnemy), Quaternion.identity);
+				obj = Instantiate(enemyPrefab, new Vector3(Random.Range(xPosMinEnemy, xPosMaxEnemy), transform.position.y, transform.position.z + distanceBetweEnemy), Quaternion.identity);
 				obj.GetComponent<EnemyController>().onRight = false;
 			}
+			obj.GetComponent<EnemyController>().moveTime = Random.Range(0.5f, 4.0f);
 			enemyPool.Enqueue(obj.GetComponent<EnemyController>());
 			distanceBetweEnemy += 2;
 			directionEnemy++;
-			countEnemyInGame--;
-			StartCoroutine(SpawnEnemy());
 		}
 	}
 
@@ -123,33 +133,15 @@ public class GameController : MonoBehaviour
 		{
 			obj.transform.position = new Vector3(Random.Range(xPosMinEnemy, xPosMaxEnemy), obj.transform.position.y, obj.transform.position.z);
 		}
+		obj.moveTime = Random.Range(0.5f, 4.0f);
 	}
 
-	IEnumerator NewPositionEnemy(EnemyController obj)
+	private void NewPositionEnemy(EnemyController obj)
 	{
-		float time = 1.0f;
-		newSpawn = false;
-		while (time > 0f)
-		{
-			time -= Time.deltaTime;
-			yield return null;
-		}
-		obj.transform.position = new Vector3(Random.Range(12, 20), obj.transform.position.y, Player.transform.position.z + distanceBetweEnemy);
-		obj.GetComponent<EnemyController>().speed -= 3f;
-		newSpawn = true;
+		obj.transform.position = new Vector3(Random.Range(xPosMinEnemy, xPosMaxEnemy), obj.transform.position.y, transform.position.z + distanceBetweEnemy);
+		obj.speed -= 3f;
 		enemyPool.Enqueue(obj);
 		distanceBetweEnemy += 2;
-		yield return null;
-	}
-
-	IEnumerator SpawnEnemy()
-	{
-		float time = 1.5f;
-		while(time > 0f)
-		{
-			time -= Time.deltaTime;
-			yield return null;
-		}
-		StartSpawnEnemy();
+		obj.moveTime = Random.Range(0.5f, 4.0f);
 	}
 }

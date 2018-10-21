@@ -12,9 +12,8 @@ public class GameController : MonoBehaviour
 	#endregion
 
 	#region Enemy
-	public GameObject enemyPrefab;
-	public GameObject enemyColonPrefab;
-	public GameObject Player;
+	public EnemyController enemyPrefab;
+	public EnemyController enemyColonPrefab;
 	private Queue<EnemyController> enemyPool = new Queue<EnemyController>();
 	private float countEnemyInGame = 25;
 	private float directionEnemy = 1;
@@ -95,7 +94,7 @@ public class GameController : MonoBehaviour
 	{
 		for (int i = 0; i < countEnemyInGame; i++)
 		{
-			GameObject obj;
+			EnemyController obj;
 			if (directionEnemy % 2 == 0)
 			{
 				obj = Instantiate(enemyPrefab, new Vector3(Random.Range(-xPosMinEnemy, -xPosMaxEnemy), transform.position.y, transform.position.z + distanceBetweEnemy), Quaternion.identity);
@@ -116,8 +115,8 @@ public class GameController : MonoBehaviour
 				obj = Instantiate(enemyPrefab, new Vector3(Random.Range(xPosMinEnemy, xPosMaxEnemy), transform.position.y, transform.position.z + distanceBetweEnemy), Quaternion.identity);
 				obj.GetComponent<EnemyController>().onRight = false;
 			}
-			obj.GetComponent<EnemyController>().moveTime = Random.Range(0.5f, 4.0f);
-			enemyPool.Enqueue(obj.GetComponent<EnemyController>());
+			obj.moveTime = Random.Range(0.5f, 4.0f);
+			enemyPool.Enqueue(obj);
 			distanceBetweEnemy += 2;
 			directionEnemy++;
 		}

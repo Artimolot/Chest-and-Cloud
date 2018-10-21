@@ -1093,11 +1093,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d92bbe16b1262e4fb539a0a5bd77fea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyPrefab: {fileID: 1373219586317098, guid: 719f3346ae3dea64c96fb32e06eb96e7,
+  enemyPrefab: {fileID: 114510636289985462, guid: 719f3346ae3dea64c96fb32e06eb96e7,
     type: 2}
-  enemyColonPrefab: {fileID: 1166474133456076, guid: 5e10a1b7771a88f4eadf985e858046fc,
+  enemyColonPrefab: {fileID: 114904664807884852, guid: 5e10a1b7771a88f4eadf985e858046fc,
     type: 2}
-  Player: {fileID: 705335114}
 --- !u!4 &1644534612
 Transform:
   m_ObjectHideFlags: 0

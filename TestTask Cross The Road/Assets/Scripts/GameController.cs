@@ -98,22 +98,22 @@ public class GameController : MonoBehaviour
 			if (directionEnemy % 2 == 0)
 			{
 				obj = Instantiate(enemyPrefab, new Vector3(Random.Range(-xPosMinEnemy, -xPosMaxEnemy), transform.position.y, transform.position.z + distanceBetweEnemy), Quaternion.identity);
-				obj.GetComponent<EnemyController>().onRight = true;
+				obj.onRight = true;
 			}
 			else if (i % 5 == 0)
 			{
 				obj = Instantiate(enemyColonPrefab, new Vector3(Random.Range(-xPosMinEnemy, -xPosMaxEnemy), transform.position.y, transform.position.z + distanceBetweEnemy), Quaternion.identity);
-				obj.GetComponent<EnemyController>().onRight = true;
+				obj.onRight = true;
 			}
 			else if (i % 9 == 0)
 			{
 				obj = Instantiate(enemyColonPrefab, new Vector3(Random.Range(xPosMinEnemy, xPosMaxEnemy), transform.position.y, transform.position.z + distanceBetweEnemy), Quaternion.identity);
-				obj.GetComponent<EnemyController>().onRight = false;
+				obj.onRight = false;
 			}
 			else
 			{
 				obj = Instantiate(enemyPrefab, new Vector3(Random.Range(xPosMinEnemy, xPosMaxEnemy), transform.position.y, transform.position.z + distanceBetweEnemy), Quaternion.identity);
-				obj.GetComponent<EnemyController>().onRight = false;
+				obj.onRight = false;
 			}
 			obj.moveTime = Random.Range(0.5f, 4.0f);
 			enemyPool.Enqueue(obj);
@@ -124,7 +124,7 @@ public class GameController : MonoBehaviour
 
 	private void ResetLineEnemy(EnemyController obj)
 	{
-		if (obj.GetComponent<EnemyController>().onRight)
+		if (obj.onRight)
 		{
 			obj.transform.position = new Vector3(Random.Range(-xPosMinEnemy, -xPosMaxEnemy), obj.transform.position.y, obj.transform.position.z);
 		}
